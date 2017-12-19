@@ -91,7 +91,7 @@
                         <md-radio-button ng-repeat="docu in docuData" ng-value="docu.value">{{ '{{docu.value}}' }}</md-radio-button>
                     </md-radio-group>
                     <p>Selected Value: <span class="radioValue"><b>{{ '{{data.docuTypes}}' }}</b></span></p>
-                    <md-button ng-click="back()" class="md-primary md-hue-1 md-raised">Back</md-button>
+                    <md-button ng-click="back()" ng-disabled="pdfIndex == 0" class="md-primary md-hue-1 md-raised">Back</md-button>
                     <md-button ng-click="submit(data.docuTypes)" ng-disabled="!data.docuTypes" class="md-primary md-hue-1 md-raised">Submit</md-button>
                 </form>
             </md-sidenav>
@@ -234,7 +234,7 @@
                 // Submit button for document types
                 $scope.submit = function(submitType) {
                     if ($scope.pdfIndex == ($scope.pdfCount - 1)) {
-                        //TODO:
+                        //TODO: functionality for when max is reached: go back to landing page and submit all JSON
                         alert("submitting values!");
                         $scope.determinateValue = 0;
                     }
