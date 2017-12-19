@@ -16,7 +16,7 @@ def get_path_ref():
     ref_dirs = [stats for stats in os.listdir(dir_path) if os.path.isdir(os.path.join(dir_path, stats))]
     # Sorts them by the last modified time (most recent first)
     ref_dirs.sort(key = lambda stats: os.path.getmtime(os.path.join(dir_path, stats)), reverse = True)
-    return ref_dirs[:50]
+    return ref_dirs
 
 # Converts a list of documents to a JSON array
 def docs_to_json(doc_list):
@@ -29,7 +29,6 @@ def docs_to_json(doc_list):
     doc_list = ['/static/docs/' + doc for doc in doc_list]
     # Converts to a JSON array
     json_list = [{'name': name, 'path': path} for name, path in zip(no_ext_list, doc_list)]
-
     return json.dumps(json_list, sort_keys=True)
 
 # Displays index.html

@@ -88,7 +88,7 @@
                 <form class="select-application-number" ng-hide="showDocumentTypes">
                     <p>Select a Planning Portal application:</p>
                     <md-radio-group ng-model="data.applications">
-                        <md-radio-button ng-repeat="num in appNums" ng-value="num.value">{{ '{{num.value}}' }}</md-radio-button>
+                        <md-radio-button ng-repeat="num in appNums" ng-value="num.id">{{ '{{num.id}}' }}</md-radio-button>
                     </md-radio-group>
                     <p>Selected Value: <span class="radioValue"><b>{{ '{{data.applications}}' }}</b></span></p>
                     <md-button ng-click="select(data.applications)" ng-disabled="!data.applications" class="md-primary md-hue-1 md-raised">Select</md-button>
@@ -107,19 +107,11 @@
 
 
                 <!--APPLICATION INFO BAR-->
-                <md-toolbar layout="row" class="md-primary md-hue-1 md-medium-tall" style="overflow-y: hidden;">
+                <md-toolbar layout="row" class="md-primary md-hue-1" style="overflow-y: hidden;">
                     <div class="md-toolbar-tools">
-                        <div style="padding-left: 20px; margin-top:21px; position: absolute">
+                        <div style="padding-left: 20px;">
                             Application: <b><div class="reference" ng-bind-html="referenceSearch"></div></b>
                         </div>
-                        <span flex></span>
-                        <md-icon style="margin-top:32px; margin-right:20px">search</md-icon>
-                        <md-select class="md-primary" placeholder="Choose a Planning Portal application" ng-model="ctrl.application" aria-label="Application ID"
-                        style="margin-top: 65px; width:500px;" md-container-class="appSelect">
-                            <md-option ng-repeat="app in ctrl.applications" ng-value="app.id" ng-click="applicationSelect(app.id)">
-                                {{ '{{app.id}}' }}
-                            </md-option>
-                        </md-select>
                     </div>
                 </md-toolbar>
 
@@ -224,24 +216,38 @@
 
             // Main controller function, covers all page elements
             function mainCtrl($scope, $sce, $mdDialog, $mdMedia, $http) {
+                /* * * * * * * * * * * * *
+                 * APPLICATION SELECTION *
+                 * * * * * * * * * * * * */
+                // Shows the applications instead of the documents when first loading
+                $scope.showDocumentTypes = false;
+
+                // Loads the list of applications
+                $scope.appNums = "{{ references|safe }}"
+                    .split(', ').map(function(app) { return { id:app }; });
+
+                // Handles the selection of an application
+                $scope.select = function(selectedApp) {
+                    // Redirects to a variable URL of the ID and performs a GET
+                    var route = `/${selectedApp}`;
+                    $http.get(route)
+                    // Response data contains a JSON array of the associated documents
+                        .then(function(response) {
+                        // Sets the value on the menu bar to equal the reference
+                        $scope.referenceSearch = selectedApp
+                        // Updates the iframe with the documents
+                        refreshDisplay(response.data);
+                        });
+                    // Shows the document types instead of the applications
+                    $scope.showDocumentTypes = true;
+                }
+
+
+
                 /* * * * * * * * * * * * * *
                  * DOCUMENT TYPE SELECTION *
                  * * * * * * * * * * * * * */
-                $scope.showDocumentTypes = false;
                 // Sets the potential document type values
-                $scope.appNums = [{
-                    value: '1234567'
-                }, {
-                    value: '7654321'
-                }, {
-                    value: '1325476'
-                }, {
-                    value: '7564231'
-                }];
-                $scope.select = function(selectedApp) {
-                    $scope.showDocumentTypes = true;
-                    //TODO: move functionality from drop-down search to here
-                }
                 $scope.docuData = [{
                     value: "1APP"
                 }, {
@@ -253,7 +259,8 @@
                 }, {
                     value: "PORTAL"
                 }];
-                // Submit button for document types
+
+                // Submit button for each document
                 $scope.submit = function(submitType) {
                     if ($scope.pdfIndex == ($scope.pdfCount - 1)) {
                         //TODO: functionality for when max is reached: go back to landing page and submit all JSON
@@ -267,33 +274,14 @@
                     }
                 }
 
+                // Back button for each document
                 $scope.back = function() {
                     $scope.pdfIndex--;
                     $scope.determinateValue -= (100 / ($scope.pdfCount -1));
+                    //TODO: remove JSON addition from application we just went back to
                 }
-                /* * * * * * * * * * * * * *
-                 * APPLICATION REF SEARCH  *
-                 * * * * * * * * * * * * * */
-                this.application = "";
-                // Load the application IDs
-                this.applications = "{{ references|safe }}"
-                    .split(', ').map(function(app) { return { id:app }; });
-                // When an application is chosen
-                $scope.applicationSelect = function(id) {
-                    // Resets query input
-                    var idText = angular.element(document.querySelector('.md-text.md-binding'));
-                    idText.html("");
-                    // Redirects to a variable URL of the ID and performs a GET
-                    var route = `/${id}`;
-                    $http.get(route)
-                    // Response data contains a JSON array of the associated documents
-                        .then(function(response) {
-                        // Sets the value on the menu bar to equal the reference
-                        $scope.referenceSearch = id
-                        // Updates the iframe with the documents
-                        refreshDisplay(response.data);
-                        });
-                }
+
+
 
                 /* * * * * * * * * * *
                  * DOCUMENT DISPLAY  *
@@ -306,33 +294,25 @@
                 $scope.pdfCount = 0;
                 // JSON array of name:url pairs for PDFs
                 $scope.pdfs = [{}];
+
                 // Loads the new set of documents
                 function refreshDisplay(json_array) {
                     $scope.pdfs = json_array;
                     $scope.pdfCount = $scope.pdfs.length;
                 }
+
                 // Lets Angular know the PDFs are a trusted resource so they can be loaded
                 $scope.trustSrc = function(src) {
                     return $sce.trustAsResourceUrl(src);
                 }
 
-                // Moves forward through PDFs, loops back around if upper limit reached
-                $scope.forward = function() {
-                    if ($scope.pdfIndex == $scope.pdfCount) {
-                        $scope.pdfIndex = 0;
-                    }
-                }
-                // Moves backward through PDFs, loops back around if lower limit reached
-                $scope.backward = function() {
-                    if ($scope.pdfIndex == -1) {
-                        $scope.pdfIndex = $scope.pdfCount - 1;
-                    }
-                }
+
 
                 /* * * * * * * * *
                  * SETTINGS MENU *
                  * * * * * * * * */
                 var originatorEv;
+
                 // Settings menu dialogue options
                 this.menuItemClick = function(index) {
                     if (index == 0) {
@@ -350,6 +330,7 @@
                     originatorEv = null;
                 }
             }
+
             // Message dialogue controller
             function dialogCtrl($scope, $mdDialog, $mdToast, $http) {
                 // Object representing a message
@@ -358,10 +339,12 @@
                     email: '',
                     message: ''
                 }
+
                 // Closes message dialogue
                 $scope.cancel = function() {
                     $mdDialog.cancel();
                 }
+
                 // Sends message
                 $scope.sendMessage = function(name, email, message) {
                     // Shows popup if some fields aren't filled in
