@@ -85,7 +85,15 @@
 
             <!--DOCUMENT SELECTION RADIO BUTTONS-->
             <md-sidenav md-disable-backdrop md-whiteframe="10" md-is-locked-open="true" layout-padding style="padding-left:20px">
-                <form>
+                <form class="select-application-number" ng-hide="showDocumentTypes">
+                    <p>Select a Planning Portal application:</p>
+                    <md-radio-group ng-model="data.applications">
+                        <md-radio-button ng-repeat="num in appNums" ng-value="num.value">{{ '{{num.value}}' }}</md-radio-button>
+                    </md-radio-group>
+                    <p>Selected Value: <span class="radioValue"><b>{{ '{{data.applications}}' }}</b></span></p>
+                    <md-button ng-click="select(data.applications)" ng-disabled="!data.applications" class="md-primary md-hue-1 md-raised">Select</md-button>
+                </form>
+                <form class="select-document-type" ng-show="showDocumentTypes">
                     <p>Select a document type:</p>
                     <md-radio-group ng-model="data.docuTypes">
                         <md-radio-button ng-repeat="docu in docuData" ng-value="docu.value">{{ '{{docu.value}}' }}</md-radio-button>
@@ -219,7 +227,21 @@
                 /* * * * * * * * * * * * * *
                  * DOCUMENT TYPE SELECTION *
                  * * * * * * * * * * * * * */
+                $scope.showDocumentTypes = false;
                 // Sets the potential document type values
+                $scope.appNums = [{
+                    value: '1234567'
+                }, {
+                    value: '7654321'
+                }, {
+                    value: '1325476'
+                }, {
+                    value: '7564231'
+                }];
+                $scope.select = function(selectedApp) {
+                    $scope.showDocumentTypes = true;
+                    //TODO: move functionality from drop-down search to here
+                }
                 $scope.docuData = [{
                     value: "1APP"
                 }, {
