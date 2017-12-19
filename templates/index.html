@@ -91,6 +91,7 @@
                         <md-radio-button ng-repeat="docu in docuData" ng-value="docu.value">{{ '{{docu.value}}' }}</md-radio-button>
                     </md-radio-group>
                     <p>Selected Value: <span class="radioValue"><b>{{ '{{data.docuTypes}}' }}</b></span></p>
+                    <md-button ng-click="back()" class="md-primary md-hue-1 md-raised">Back</md-button>
                     <md-button ng-click="submit(data.docuTypes)" ng-disabled="!data.docuTypes" class="md-primary md-hue-1 md-raised">Submit</md-button>
                 </form>
             </md-sidenav>
@@ -121,14 +122,6 @@
                         <div class="md-toolbar-tools">
                             <h1 style="padding-left: 20px">Documents: <b>{{ '{{trustSrc(pdfs[pdfIndex].name)}}' }}</b></h1>
                             <span flex></span>
-                            <div>
-                                <md-button ng-click="backward()" class="md-icon-button">
-                                    <md-icon>arrow_backward</md-icon>
-                                </md-button>
-                                <md-button ng-click="forward()" class="md-icon-button">
-                                    <md-icon>arrow_forward</md-icon>
-                                </md-button>
-                            </div>
                         </div>
                     </md-toolbar>
                 </md-content>
@@ -240,10 +233,22 @@
                 }];
                 // Submit button for document types
                 $scope.submit = function(submitType) {
-                    console.log($scope.pdfCount);
-                    $scope.determinateValue += (100 / ($scope.pdfCount -1));
+                    if ($scope.pdfIndex == ($scope.pdfCount - 1)) {
+                        //TODO:
+                        alert("submitting values!");
+                        $scope.determinateValue = 0;
+                    }
+                    else {
+                        //TODO: build JSON for each document
+                        $scope.pdfIndex++;
+                        $scope.determinateValue += (100 / ($scope.pdfCount -1));
+                    }
                 }
 
+                $scope.back = function() {
+                    $scope.pdfIndex--;
+                    $scope.determinateValue -= (100 / ($scope.pdfCount -1));
+                }
                 /* * * * * * * * * * * * * *
                  * APPLICATION REF SEARCH  *
                  * * * * * * * * * * * * * */
@@ -271,6 +276,8 @@
                 /* * * * * * * * * * *
                  * DOCUMENT DISPLAY  *
                  * * * * * * * * * * */
+                // Handles the progress bar
+                $scope.determinateValue = 0;
                 // Indexes JSON array
                 $scope.pdfIndex = 0;
                 // Amount of PDFs associated with an application
@@ -286,18 +293,15 @@
                 $scope.trustSrc = function(src) {
                     return $sce.trustAsResourceUrl(src);
                 }
-                // Handles the progress bar
-                $scope.determinateValue = 0;
+
                 // Moves forward through PDFs, loops back around if upper limit reached
                 $scope.forward = function() {
-                    $scope.pdfIndex++;
                     if ($scope.pdfIndex == $scope.pdfCount) {
                         $scope.pdfIndex = 0;
                     }
                 }
                 // Moves backward through PDFs, loops back around if lower limit reached
                 $scope.backward = function() {
-                    $scope.pdfIndex--;
                     if ($scope.pdfIndex == -1) {
                         $scope.pdfIndex = $scope.pdfCount - 1;
                     }
