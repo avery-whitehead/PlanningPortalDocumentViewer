@@ -29,49 +29,28 @@
             max-width: 250px;
         }
 
-        .dropdown md-input-container label {
-            color: rgba(255,255,255,0.8) !important;
-            border-color: rgba(255,255,255,0.3) !important;
-        }
-
-        .dropdown md-input-container.md-input-focused label {
-            color: rgba(255,255,255,0.8) !important;
-            border-color: rgba(255,255,255,0.3) !important;
-        }
-
-        .dropdown md-input-container.md-default-theme.md-input-invalid .md-input, md-input-container.md-input-invalid .md-input {
-            color: rgba(255,255,255,0.8) !important;
-            border-color: rgba(255,255,255,0.3) !important;
-        }
-
-        .dropdown md-input-container.md-default-theme .md-input, md-input-container .md-input {
-            color: rgba(255,255,255,0.8) !important;
-            border-color: rgba(255,255,255,0.3) !important;
-        }
-
-        .message-form md-input-container label {
-            color: rgba(0,0,0,0.8) !important;
-            border-color: rgba(0,0,0,0.3) !important;
-        }
-
-        .message-form md-input-container.md-input-focused label {
-            color: rgba(0,0,0,0.8) !important;
-            border-color: rgba(0,0,0,0.3) !important;
-        }
-
-        .message-form md-input-container.md-default-theme.md-input-invalid .md-input, md-input-container.md-input-invalid .md-input {
-            color: rgba(0,0,0,0.8) !important;
-            border-color: rgba(0,0,0,0.3) !important;
-        }
-
-        .message-formn md-input-container.md-default-theme .md-input, md-input-container .md-input {
-            color: rgba(0,0,0,0.8) !important;
-            border-color: rgba(0,0,0,0.3) !important;
-        }
-
         md-toast.md-center {
             left: 50%;
             transform: translate3d(-50%, 0, 0);
+        }
+
+        .appSelect md-select-menu {
+            margin-right: 8px;
+        }
+
+        .appSelect span {
+            color: rgba(255,255,255,1) !important;
+            border-color: rgba(255,255,255,0.3) !important;
+        }
+
+        #select_value_label_0 {
+            color: rgba(255,255,1) !important;
+            border-color: rgba(255,255,255,0.3) !important;
+        }
+
+        md-select-value.md-select-placeholder {
+            color: rgba(255,255,255,0.5) !important;
+            border-color: rgba(255,255,255,0.3) !important;
         }
     </style>
 </head>
@@ -98,6 +77,8 @@
             </md-menu>
         </md-toolbar>
         <section layout="row" flex>
+
+
             <!--DOCUMENT SELECTION RADIO BUTTONS-->
             <md-sidenav md-disable-backdrop md-whiteframe="10" md-is-locked-open="true" layout-padding style="padding-left:20px">
                 <form>
@@ -110,6 +91,8 @@
                 </form>
             </md-sidenav>
             <div layout="column" flex>
+
+
                 <!--APPLICATION INFO BAR-->
                 <md-toolbar layout="row" class="md-primary md-hue-1 md-medium-tall" style="overflow-y: hidden;">
                     <div class="md-toolbar-tools">
@@ -117,25 +100,17 @@
                             Application: <b><div class="reference" ng-bind-html="referenceSearch"></div></b>
                         </div>
                         <span flex></span>
-                        <md-icon style="margin-top:32px; margin-right:10px">search</md-icon>
-                        <md-autocomplete
-                            class="dropdown"
-                            flex md-input-name="autocompleteField"
-                            ng-disabled="ctrl.isDisabled"
-                            md-no-cache="ctrl.noCache"
-                            md-selected-item="ctrl.selectedItem"
-                            md-search-text="ctrl.searchText"
-                            md-selected-item-change="ctrl.selectedItemChange(item)"
-                            md-items="item in ctrl.querySearch(ctrl.searchText)"
-                            md-item-text="item.display"
-                            md-min-length="1"
-                            md-floating-label="Search for a Planning Portal application reference"
-                            style="margin-top: 60px; margin-right: 150px;">
-                                <span md-highlight-text="ctrl.searchText">{{ '{{item.display}}' }}</span>
-                            </md-item-template>
-                        </md-autocomplete>
+                        <md-icon style="margin-top:32px; margin-right:20px">search</md-icon>
+                        <md-select placeholder="Choose a Planning Portal application" ng-model="ctrl.application" aria-label="Application ID"
+                        style="margin-top: 65px; width:500px;" md-container-class="appSelect">
+                            <md-option ng-repeat="app in ctrl.applications" ng-value="app.id" ng-click="applicationSelect(app.id)">
+                                {{ '{{app.id}}' }}
+                            </md-option>
+                        </md-select>
                     </div>
                 </md-toolbar>
+
+
                 <!--DOCUMENT INFO BAR-->
                 <md-content md-whiteframe="4">
                     <md-toolbar layout="row" class="md-primary md-hue-2" style="overflow-y: hidden;">
@@ -153,6 +128,8 @@
                         </div>
                     </md-toolbar>
                 </md-content>
+
+
                 <!--PDF VIEWER-->
                 <div class="fill">
                     <iframe class="pdf" ng-src="{{ '{{trustSrc(pdfs[pdfIndex].path)}}' }}" frameborder="0"></iframe>
@@ -160,6 +137,8 @@
             </div>
         </section>
     </div>
+
+
     <!--EMAIL DIALOGUE-->
     <script type="text/ng-template" id="dialog.tmpl.html">
         <md-dialog aria-label="Send Message" style="width:800px; padding: 5px;" id="toast-container">
@@ -173,6 +152,8 @@
                         </md-button>
                     </div>
                 </md-toolbar>
+
+
                 <!--FORM FIELDS-->
                 <md-dialog-content class="md-no-momentum"  style="padding-top: 25px">
                     <md-input-container class="md-block">
@@ -188,6 +169,8 @@
                         <textarea name="message" ng-model="message.message" type="text" placeholder="Message (required)" md-maxlength="300" ng-required="true" rows="5"></textarea>
                     </md-input-container>
                 </md-dialog-content>
+
+
                 <!--FORM BUTTONS-->
                 <md-dialog-actions layout="row">
                     <md-button ng-click="cancel()" class="md-primary md-hue-1 md-raised">
@@ -253,47 +236,25 @@
                 /* * * * * * * * * * * * * *
                  * APPLICATION REF SEARCH  *
                  * * * * * * * * * * * * * */
-                var self = this;
-                self.states = loadStates();
-                self.querySearch = querySearch;
-                self.selectedItemChange = selectedItemChange;
-                // Asynchronous search operation, returns search results for a query
-                function querySearch (query) {
-                    var results = query ? self.states.filter( createFilterFor(query) ) :
-                        self.states, deferred;
-                    return results
-                }
-                // Fires when a search query result reference is selected
-                function selectedItemChange(item) {
+                this.application = "";
+                // Load the application IDs
+                this.applications = "{{ references|safe }}"
+                    .split(', ').map(function(app) { return { id:app }; });
+                // When an application is chosen
+                $scope.applicationSelect = function(id) {
                     // Resets query input
-                    self.searchText = "";
-                    // Redirects to a variable URL of the reference and performs a GET
-                    var route = `/${item.value}`;
+                    var idText = angular.element(document.querySelector('.md-text.md-binding'));
+                    idText.html("");
+                    // Redirects to a variable URL of the ID and performs a GET
+                    var route = `/${id}`;
                     $http.get(route)
-                        // Response data contains a JSON array of the associated documents
+                    // Response data contains a JSON array of the associated documents
                         .then(function(response) {
-                            // Sets the value on the menu bar to equal the reference
-                            $scope.referenceSearch = item.value;
-                            // Updates the iframe with the documents
-                            refreshDisplay(response.data);
+                        // Sets the value on the menu bar to equal the reference
+                        $scope.referenceSearch = id
+                        // Updates the iframe with the documents
+                        refreshDisplay(response.data);
                         });
-                }
-                // Loads and converts all reference values into a value:display pair
-                function loadStates() {
-                    var allStates = "{{ references|safe }}";
-                    return allStates.split(/, +/g).map( function (state) {
-                        return {
-                            value: state.toLowerCase(),
-                            display: state
-                        }
-                    })
-                }
-                // Filters out reference values that don't match the query
-                function createFilterFor(query) {
-                    var lowercaseQuery = angular.lowercase(query);
-                    return function filterFn(state) {
-                        return (state.value.indexOf(lowercaseQuery) >= 0);
-                    }
                 }
 
                 /* * * * * * * * * * *

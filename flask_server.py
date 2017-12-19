@@ -2,7 +2,7 @@ import os, sys, time, shutil, json, ast
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from werkzeug.utils import secure_filename
 
-dir_path = '//ccvuni01/PlanningPortal/_Archive'
+dir_path = '//ccvuni01/PlanningPortal/_ToIndex'
 UPLOAD_FOLDER = '/docs/'
 ALLOWED_EXTENSIONS = set(['pdf', 'jpg', 'jpeg', 'png'])
 
@@ -10,13 +10,12 @@ ALLOWED_EXTENSIONS = set(['pdf', 'jpg', 'jpeg', 'png'])
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Gets the 50 most recent applications
+# Gets the un-indexed applications
 def get_path_ref():
     # Gets a list of directories in the path
     ref_dirs = [stats for stats in os.listdir(dir_path) if os.path.isdir(os.path.join(dir_path, stats))]
     # Sorts them by the last modified time (most recent first)
     ref_dirs.sort(key = lambda stats: os.path.getmtime(os.path.join(dir_path, stats)), reverse = True)
-    # Return the first 50 results
     return ref_dirs[:50]
 
 # Converts a list of documents to a JSON array
@@ -37,6 +36,10 @@ def docs_to_json(doc_list):
 @app.route('/')
 def host():
     references = get_path_ref()
+    # Clear static/docs folder
+    local_doc_path = 'static/docs/'
+    for local_doc in os.listdir(local_doc_path):
+        os.remove(local_doc_path + local_doc)
     # Passes a list of references to the HTML/JS
     return render_template('index.html', references=', '.join(get_path_ref()))
 
@@ -45,7 +48,7 @@ def host():
 def get_docs(ref_id):
     ref_string = str(ref_id)
     local_doc_path = 'static/docs/'
-    remote_doc_path = '//ccvuni01/PlanningPortal/_Archive/' + ref_string + '/Attachments'
+    remote_doc_path = '//ccvuni01/PlanningPortal/_ToIndex/' + ref_string + '/Attachments'
     # Clear static/docs folder
     for local_doc in os.listdir(local_doc_path):
         os.remove(local_doc_path + local_doc)
@@ -63,9 +66,9 @@ def handle_messsage():
     # Strip any Unicode "u'"s from the data and convert to JSON
     data = ast.literal_eval(json.dumps(request.json))
     # Build the mail message
-    message = 'Name: %s\nEmail: %s\nMessage: %s' % (data.name, data.email, data.message)
+    message = 'Name: %s\nEmail: %s\nMessage: %s' % (data['name'], data['email'], data['message'])
     print message
-    loc = 'logs/%s' % data.name
+    #loc = 'logs/%s' % data.name
     #try:
         #file = open('logs/')
 
