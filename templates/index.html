@@ -134,6 +134,12 @@
                 </md-content>
 
 
+                <!--PROGRESS BAR-->
+                <md-content>
+                    <md-progress-linear md-mode="determinate" value="{{ '{{determinateValue}}' }}"></md-progresslinear>
+                </md-content>
+
+
                 <!--PDF VIEWER-->
                 <div class="fill">
                     <iframe class="pdf" ng-src="{{ '{{trustSrc(pdfs[pdfIndex].path)}}' }}" frameborder="0"></iframe>
@@ -234,7 +240,8 @@
                 }];
                 // Submit button for document types
                 $scope.submit = function(submitType) {
-                    $scope.submitType = "<p>" + submitType + "</p>"
+                    console.log($scope.pdfCount);
+                    $scope.determinateValue += (100 / ($scope.pdfCount -1));
                 }
 
                 /* * * * * * * * * * * * * *
@@ -279,6 +286,8 @@
                 $scope.trustSrc = function(src) {
                     return $sce.trustAsResourceUrl(src);
                 }
+                // Handles the progress bar
+                $scope.determinateValue = 0;
                 // Moves forward through PDFs, loops back around if upper limit reached
                 $scope.forward = function() {
                     $scope.pdfIndex++;
