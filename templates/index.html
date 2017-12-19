@@ -52,6 +52,10 @@
             color: rgba(255,255,255,0.5) !important;
             border-color: rgba(255,255,255,0.3) !important;
         }
+
+        md-select.md-default-theme:not([disabled]):focus .md-select-value, md-select:not([disabled]):focus .md-select-value {
+            color: rgba(255,255,255,0.5) !important;
+        }
     </style>
 </head>
 
@@ -101,7 +105,7 @@
                         </div>
                         <span flex></span>
                         <md-icon style="margin-top:32px; margin-right:20px">search</md-icon>
-                        <md-select placeholder="Choose a Planning Portal application" ng-model="ctrl.application" aria-label="Application ID"
+                        <md-select class="md-primary" placeholder="Choose a Planning Portal application" ng-model="ctrl.application" aria-label="Application ID"
                         style="margin-top: 65px; width:500px;" md-container-class="appSelect">
                             <md-option ng-repeat="app in ctrl.applications" ng-value="app.id" ng-click="applicationSelect(app.id)">
                                 {{ '{{app.id}}' }}
