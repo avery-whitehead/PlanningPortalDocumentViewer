@@ -120,7 +120,8 @@
                 <md-content md-whiteframe="4">
                     <md-toolbar layout="row" class="md-primary md-hue-2" style="overflow-y: hidden;">
                         <div class="md-toolbar-tools">
-                            <h1 style="padding-left: 20px">Documents: <b>{{ '{{trustSrc(pdfs[pdfIndex].name)}}' }}</b></h1>
+                            <h1 style="padding-left: 20px" ng-hide="showDocumentName">Documents:</b></h1>
+                            <h1 style="padding-left: 20px" ng-show="showDocumentName">Documents: <b>{{ '{{trustSrc(pdfs[pdfIndex].name)}}' }}</b></h1>
                             <span flex></span>
                         </div>
                     </md-toolbar>
@@ -135,7 +136,8 @@
 
                 <!--PDF VIEWER-->
                 <div class="fill">
-                    <iframe class="pdf" ng-src="{{ '{{trustSrc(pdfs[pdfIndex].path)}}' }}" frameborder="0"></iframe>
+                    <iframe src="about:blank" frameborder="0" ng-hide="showDocumentFrame"></iframe>
+                    <iframe class="pdf" ng-src="{{ '{{trustSrc(pdfs[pdfIndex].path)}}' }}" frameborder="0" ng-show="showDocumentFrame"></iframe>
                 </div>
             </div>
         </section>
@@ -221,6 +223,10 @@
                  * * * * * * * * * * * * */
                 // Shows the applications instead of the documents when first loading
                 $scope.showDocumentTypes = false;
+                // Leave the documents menu bar blank
+                $scope.showDocumentName = false;
+                // Hide the iframe
+                $scope.showDocumentFrame = false;
 
                 // Loads the list of applications
                 $scope.appNums = "{{ references|safe }}"
@@ -240,6 +246,10 @@
                         });
                     // Shows the document types instead of the applications
                     $scope.showDocumentTypes = true;
+                    // Start filling in the documents menu bar
+                    $scope.showDocumentName = true;
+                    // Load the iframe
+                    $scope.showDocumentFrame = true;
                 }
 
 
@@ -264,8 +274,14 @@
                 $scope.submit = function(submitType) {
                     if ($scope.pdfIndex == ($scope.pdfCount - 1)) {
                         //TODO: functionality for when max is reached: go back to landing page and submit all JSON
-                        alert("submitting values!");
+                        // Reset any values back to their defaults when first loading the page
+                        $scope.showDocumentTypes = false;
+                        $scope.showDocumentName = false;
+                        $scope.showDocumentFrame = false;
                         $scope.determinateValue = 0;
+                        $scope.pdfIndex = 0;
+                        $scope.referenceSearch = "";
+                        $http.get('/')
                     }
                     else {
                         //TODO: build JSON for each document
