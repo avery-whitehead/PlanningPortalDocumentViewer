@@ -1,14 +1,9 @@
 import os, sys, time, shutil, json, ast
 from flask import Flask, render_template, request, redirect, url_for, jsonify
-from werkzeug.utils import secure_filename
 
 dir_path = '//ccvuni01/PlanningPortal/_ToIndex'
-UPLOAD_FOLDER = '/docs/'
-ALLOWED_EXTENSIONS = set(['pdf', 'jpg', 'jpeg', 'png'])
-
 # Creates a Flask application called 'app'
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Gets the un-indexed applications
 def get_path_ref():
@@ -29,6 +24,9 @@ def docs_to_json(doc_list):
     doc_list = ['/static/docs/' + doc for doc in doc_list]
     # Converts to a JSON array
     json_list = [{'name': name, 'path': path} for name, path in zip(no_ext_list, doc_list)]
+    no_show_list = ['ApplicationForm', 'ApplicationFormNoPersonalData', 'AttachmentSummary', 'FeeCalculation']
+    json_list[:] = [keep for keep in json_list if keep.get('name') not in no_show_list]
+    print json_list
     return json.dumps(json_list, sort_keys=True)
 
 # Displays index.html
