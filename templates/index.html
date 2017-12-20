@@ -116,8 +116,8 @@
                 </form>
                 <form class="select-document-type" ng-show="showDocumentTypes">
                     <md-content>
-                        <md-list flex ng-model="docs.docuTypes" style="padding-top: 0px; padding-bottom: 0px;">
-                            <md-list-item class="md-3-line" ng-repeat="docu in docuData" ng-click="submit(docu.value)">
+                        <md-list flex ng-model="data.docs" style="padding-top: 0px; padding-bottom: 0px;">
+                            <md-list-item class="md-3-line" ng-repeat="docu in docuData" ng-click="submit(docu.value, pdfs[pdfIndex].name, num.id)">
                                 <div class="md-list-item-text">
                                     <md-icon style="float: left;">description</md-icon>
                                     <span style="position: absolute; margin-top: 3px;">
@@ -138,22 +138,11 @@
                         </md-list>
                     </md-content>
                 </form>
-                <!--
-                <form class="select-document-type" ng-show="showDocumentTypes">
-                    <p>Select a document type:</p>
-                    <md-radio-group ng-model="data.docuTypes">
-                        <md-radio-button ng-repeat="docu in docuData" ng-value="docu.value">{{ '{{docu.value}}' }}</md-radio-button>
-                    </md-radio-group>
-                    <p>Selected Value: <span class="radioValue"><b>{{ '{{data.docuTypes}}' }}</b></span></p>
-                    <md-button ng-click="back()" ng-disabled="pdfIndex == 0" class="md-primary md-hue-1 md-raised">Back</md-button>
-                    <md-button ng-click="submit(data.docuTypes)" ng-disabled="!data.docuTypes" class="md-primary md-hue-1 md-raised">Submit</md-button>
-                </form>
-                -->
             </md-sidenav>
+
+
+            <!--APPLICATION INFO BAR-->
             <div layout="column" flex>
-
-
-                <!--APPLICATION INFO BAR-->
                 <md-toolbar layout="row" class="md-primary md-hue-1" style="overflow-y: hidden;">
                     <div class="md-toolbar-tools">
                         <div style="padding-left: 20px;">
@@ -323,13 +312,15 @@
                 }, {
                     value: "PORTAL"
                 }];
-                var submittedTypes = [{}];
+                var submittedTypes = [];
 
                 // Submit button for each document
-                $scope.submit = function(submitType) {
-                    console.log(submitType);
+                $scope.submit = function(submitType, docName) {
+                    console.log($scope.referenceSearch);
+                    // Builds the JSON for each application
+                    submittedTypes.push({application: $scope.referenceSearch, name: docName, type: submitType});
                     if ($scope.pdfIndex == ($scope.pdfCount - 1)) {
-                        //TODO: functionality for when max is reached: go back to landing page and submit all JSON
+                        console.log(submittedTypes);
                         // Reset any values back to their defaults when first loading the page
                         $scope.showDocumentTypes = false;
                         $scope.showDocumentName = false;
@@ -338,12 +329,15 @@
                         $scope.pdfIndex = 0;
                         $scope.pdfs = [{}];
                         $scope.referenceSearch = "";
-                        $http.get('/')
-                    }
-                    else {
-                        //TODO: build JSON for each document
-                        $scope.pdfIndex++;
+                        // Send JSON of document types to server
+                        $http.post("/submit", submittedTypes);
+                        submittedTypes = [];
+                        $http.get('/');
+                        // Force a reload to update the applications list
+                        window.location.reload();
+                    } else {
                         $scope.determinateValue += (100 / ($scope.pdfCount - 1));
+                        $scope.pdfIndex++;
                     }
                 }
 
@@ -351,7 +345,8 @@
                 $scope.back = function() {
                     $scope.pdfIndex--;
                     $scope.determinateValue -= (100 / ($scope.pdfCount - 1));
-                    //TODO: remove JSON addition from application we just went back to
+                    // Removes the most recent JSON addition
+                    submittedTypes.pop();
                 }
 
 

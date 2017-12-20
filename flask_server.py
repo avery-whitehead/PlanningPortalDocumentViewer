@@ -1,7 +1,8 @@
 import os, sys, time, shutil, json, ast
 from flask import Flask, render_template, request, redirect, url_for, jsonify
+from distutils.dir_util import copy_tree
 
-dir_path = '//ccvuni01/PlanningPortal/_ToIndex'
+dir_path = '//ccvuni01/PlanningPortal'
 # Document names not to be shown in the viewer
 no_show_list = ['ApplicationForm', 'ApplicationFormNoPersonalData', 'AttachmentSummary', 'FeeCalculation']
 # Creates a Flask application called 'app'
@@ -13,6 +14,8 @@ def get_path_ref():
     ref_dirs = [stats for stats in os.listdir(dir_path) if os.path.isdir(os.path.join(dir_path, stats))]
     # Sorts them by the last modified time (most recent first)
     ref_dirs.sort(key = lambda stats: os.path.getmtime(os.path.join(dir_path, stats)), reverse = True)
+    # Stops the utility folders (e.g. '_Archive', '_ToIndex') from being included
+    ref_dirs[:] = [keep for keep in ref_dirs if not keep.startswith('_')]
     return ref_dirs
 
 # Converts a list of documents to a JSON array
@@ -26,6 +29,7 @@ def docs_to_json(doc_list):
     doc_list = ['/static/docs/' + doc for doc in doc_list]
     # Converts to a JSON array
     json_list = [{'name': name, 'path': path} for name, path in zip(no_ext_list, doc_list)]
+    # Removes the standard, non-unique documents from the list
     json_list[:] = [keep for keep in json_list if keep.get('name') not in no_show_list]
     return json.dumps(json_list, sort_keys=True)
 
@@ -45,7 +49,7 @@ def host():
 def get_docs(ref_id):
     ref_string = str(ref_id)
     local_doc_path = 'static/docs/'
-    remote_doc_path = '//ccvuni01/PlanningPortal/_ToIndex/' + ref_string + '/Attachments'
+    remote_doc_path = '//ccvuni01/PlanningPortal/' + ref_string + '/Attachments'
     # Clear static/docs folder
     for local_doc in os.listdir(local_doc_path):
         os.remove(local_doc_path + local_doc)
@@ -65,14 +69,27 @@ def handle_messsage():
     data = ast.literal_eval(json.dumps(request.json))
     # Build the mail message
     message = 'Name: %s\nEmail: %s\nMessage: %s' % (data['name'], data['email'], data['message'])
-    print message
     #loc = 'logs/%s' % data.name
     #try:
         #file = open('logs/')
-
-
     return jsonify(request.json)
 
+@app.route('/submit', methods=['POST'])
+def handle_doc_types():
+    # Strip any Unicode "u'"s from the data and convert to JSON
+    data = ast.literal_eval(json.dumps(request.json))
+    # Get the application number
+    app_num = data[0]['application']
+    # Create a string out of the JSON
+    json_string = json.dumps(request.json)
+    # Create a file and write the string to it
+    with open('//ccvuni01/PlanningPortal/' + app_num + '/' + app_num + '.json', 'w') as json_file:
+        json_file.write(json_string)
+    # Copy the folder over
+    copy_tree('//ccvuni01/PlanningPortal/' + app_num, '//ccvuni01/PlanningPortal/_ToIndex/' + app_num)
+    # Remove the original folder
+    shutil.rmtree('//ccvuni01/PlanningPortal/' + app_num)
+    return jsonify(request.json)
 
 # Run the Flask application
 if __name__ == '__main__':
