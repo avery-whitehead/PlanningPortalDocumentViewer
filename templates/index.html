@@ -260,7 +260,7 @@
             })
 
             // Main controller function, covers all page elements
-            function mainCtrl($scope, $sce, $mdDialog, $mdMedia, $http) {
+            function mainCtrl($scope, $sce, $mdDialog, $mdMedia, $mdToast, $http) {
                 /* * * * * * * * * * * * *
                  * APPLICATION SELECTION *
                  * * * * * * * * * * * * */
@@ -367,6 +367,17 @@
                 function refreshDisplay(json_array) {
                     $scope.pdfs = json_array;
                     $scope.pdfCount = $scope.pdfs.length;
+                    // If there's no documents available
+                    if ($scope.pdfCount == 0) {
+                        $mdToast.show(
+                            $mdToast.simple({
+                                textContent: 'No documents found for this application!\nReturning to home screen',
+                                parent: '#toast-container',
+                                position: 'top center',
+                                hideDelay: 3000
+                            })
+                        );
+                    }
                 }
 
                 // Lets Angular know the PDFs are a trusted resource so they can be loaded
