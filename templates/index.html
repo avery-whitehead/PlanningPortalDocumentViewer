@@ -67,7 +67,7 @@
 <body ng-controller="mainCtrl as ctrl" style="overflow-y: hidden;">
     <div layout="column" md-theme="default" md-theme-watch="true" ng-cloak layout-fill>
         <!--HEADER-->
-        <md-toolbar layout="row" class="md-primary md-toolbar-tools">
+        <md-toolbar layout="row" class="md-primary md-toolbar-tools" style="height: 45px; min-height: 45px; max-height:45px;">
             <h3 style="padding-left: 10px">Planning Portal Document Viewer</h3>
             <span flex></span>
             <md-menu md-position-mode="target-right bottom">
@@ -91,13 +91,16 @@
             <!--DOCUMENT/APPLICATION SELECTION-->
             <md-sidenav md-disable-backdrop md-whiteframe="10" md-is-locked-open="true">
                 <md-toolbar layout="row" class="md-primary md-hue-1">
-                    <div class="md-toolbar-tools">
+                    <div class="md-toolbar-tools" ng-hide="showDocumentTypes">
                         <span style="padding-left: 10px">Select a Planning Portal application:</span>
+                    </div>
+                    <div class="md-toolbar-tools" ng-show="showDocumentTypes">
+                        <span style="padding-left: 10px">Select a document type:</span>
                     </div>
                 </md-toolbar>
                 <form class="select-application-number" ng-hide="showDocumentTypes">
                     <md-content>
-                        <md-list flex="" ng-model="data.applications">
+                        <md-list flex ng-model="data.applications" style="padding-top: 0px; padding-bottom: 0px;">
                             <md-list-item class="md-3-line" ng-repeat="num in appNums" ng-click="select(num.id)">
                                 <div class="md-list-item-text">
                                     <md-icon style="float: left;">folder_open</md-icon>
@@ -112,6 +115,31 @@
                     </md-content>
                 </form>
                 <form class="select-document-type" ng-show="showDocumentTypes">
+                    <md-content>
+                        <md-list flex ng-model="docs.docuTypes" style="padding-top: 0px; padding-bottom: 0px;">
+                            <md-list-item class="md-3-line" ng-repeat="docu in docuData" ng-click="submit(docu.value)">
+                                <div class="md-list-item-text">
+                                    <md-icon style="float: left;">description</md-icon>
+                                    <span style="position: absolute; margin-top: 3px;">
+                                        <h3 style="float: left;">&nbsp;&nbsp;&nbsp;{{ '{{docu.value}}' }}</h3>
+                                    </span>
+                                    <md-icon style="float: right;">chevron_right</md-icon>
+                                </div>
+                                <md-divider></md-divider>
+                            </md-list-item>
+                            <md-list-item class="md-2-line" ng-hide="pdfIndex == 0" ng-click="back()">
+                                <div class="md-list-item-text">
+                                    <md-icon style="float-right;">chevron_left</md-icon>
+                                    <span style="position: absolute; margin-top: 10px;">
+                                        <h3>&nbsp;&nbsp;&nbsp;Back</h3>
+                                    </span>
+                                </div>
+                                <md-divider></md-divider>
+                        </md-list>
+                    </md-content>
+                </form>
+                <!--
+                <form class="select-document-type" ng-show="showDocumentTypes">
                     <p>Select a document type:</p>
                     <md-radio-group ng-model="data.docuTypes">
                         <md-radio-button ng-repeat="docu in docuData" ng-value="docu.value">{{ '{{docu.value}}' }}</md-radio-button>
@@ -120,6 +148,7 @@
                     <md-button ng-click="back()" ng-disabled="pdfIndex == 0" class="md-primary md-hue-1 md-raised">Back</md-button>
                     <md-button ng-click="submit(data.docuTypes)" ng-disabled="!data.docuTypes" class="md-primary md-hue-1 md-raised">Submit</md-button>
                 </form>
+                -->
             </md-sidenav>
             <div layout="column" flex>
 
@@ -298,6 +327,7 @@
 
                 // Submit button for each document
                 $scope.submit = function(submitType) {
+                    console.log(submitType);
                     if ($scope.pdfIndex == ($scope.pdfCount - 1)) {
                         //TODO: functionality for when max is reached: go back to landing page and submit all JSON
                         // Reset any values back to their defaults when first loading the page
@@ -306,20 +336,21 @@
                         $scope.showDocumentFrame = false;
                         $scope.determinateValue = 0;
                         $scope.pdfIndex = 0;
+                        $scope.pdfs = [{}];
                         $scope.referenceSearch = "";
                         $http.get('/')
                     }
                     else {
                         //TODO: build JSON for each document
                         $scope.pdfIndex++;
-                        $scope.determinateValue += (100 / ($scope.pdfCount));
+                        $scope.determinateValue += (100 / ($scope.pdfCount - 1));
                     }
                 }
 
                 // Back button for each document
                 $scope.back = function() {
                     $scope.pdfIndex--;
-                    $scope.determinateValue -= (100 / ($scope.pdfCount));
+                    $scope.determinateValue -= (100 / ($scope.pdfCount - 1));
                     //TODO: remove JSON addition from application we just went back to
                 }
 

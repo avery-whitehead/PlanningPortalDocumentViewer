@@ -2,6 +2,8 @@ import os, sys, time, shutil, json, ast
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 
 dir_path = '//ccvuni01/PlanningPortal/_ToIndex'
+# Document names not to be shown in the viewer
+no_show_list = ['ApplicationForm', 'ApplicationFormNoPersonalData', 'AttachmentSummary', 'FeeCalculation']
 # Creates a Flask application called 'app'
 app = Flask(__name__)
 
@@ -24,9 +26,7 @@ def docs_to_json(doc_list):
     doc_list = ['/static/docs/' + doc for doc in doc_list]
     # Converts to a JSON array
     json_list = [{'name': name, 'path': path} for name, path in zip(no_ext_list, doc_list)]
-    no_show_list = ['ApplicationForm', 'ApplicationFormNoPersonalData', 'AttachmentSummary', 'FeeCalculation']
     json_list[:] = [keep for keep in json_list if keep.get('name') not in no_show_list]
-    print json_list
     return json.dumps(json_list, sort_keys=True)
 
 # Displays index.html
@@ -53,7 +53,8 @@ def get_docs(ref_id):
     for remote_doc in os.listdir(remote_doc_path):
         full_path = os.path.join(remote_doc_path, remote_doc)
         if (os.path.isfile(full_path)):
-            shutil.copy(full_path, local_doc_path)
+            if not any(name in full_path for name in no_show_list):
+                shutil.copy(full_path, local_doc_path)
     docs_to_json(os.listdir(local_doc_path))
     # Return the reference search result
     return docs_to_json(os.listdir(local_doc_path))
