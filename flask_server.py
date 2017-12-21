@@ -1,5 +1,6 @@
-import os, sys, time, shutil, json, ast
+import os, sys, time, shutil, json, ast, fnmatch
 from flask import Flask, render_template, request, redirect, url_for, jsonify
+from itertools import ifilterfalse
 from distutils.dir_util import copy_tree
 
 dir_path = '//ccvuni01/PlanningPortal'
@@ -16,7 +17,15 @@ def get_path_ref():
     ref_dirs.sort(key = lambda stats: os.path.getmtime(os.path.join(dir_path, stats)), reverse = True)
     # Stops the utility folders (e.g. '_Archive', '_ToIndex') from being included
     ref_dirs[:] = [keep for keep in ref_dirs if not keep.startswith('_')]
-    return ref_dirs
+    # Stops any folders with just the four standard documents being included
+    temp_ref_dirs = []
+    for ref_dir in ref_dirs:
+        docs_folder = dir_path + '/' + ref_dir + '/Attachments'
+        # Counts the number of documents in the attachments folder
+        doc_count = len(fnmatch.filter(os.listdir(docs_folder), '*.*'))
+        if doc_count != 4:
+            temp_ref_dirs.append(ref_dir)
+    return temp_ref_dirs
 
 # Converts a list of documents to a JSON array
 def docs_to_json(doc_list):
@@ -80,6 +89,7 @@ def handle_doc_types():
     data = ast.literal_eval(json.dumps(request.json))
     # Get the application number
     app_num = data[0]['application']
+    print "hi: " + app_num
     # Create a string out of the JSON
     json_string = json.dumps(request.json)
     # Create a file and write the string to it
