@@ -334,6 +334,13 @@
                         $scope.determinateValue = 0;
                         $scope.pdfIndex = 0;
                         $scope.pdfs = [{}];
+                        $mdToast.show(
+                            $mdToast.simple({
+                                textContent: 'Document types submitted for ' + $scope.referenceSearch,
+                                position: 'top center',
+                                hideDelay: 3000
+                            })
+                        );
                         $scope.referenceSearch = "";
                         // Send JSON of document types to server
                         $http.post("/submit", submittedTypes);
