@@ -1,4 +1,5 @@
 import os, sys, time, shutil, json, ast, fnmatch
+import win32com.client as client
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from itertools import ifilterfalse
 from distutils.dir_util import copy_tree
@@ -58,6 +59,9 @@ def host():
 def get_docs(ref_id):
     ref_string = str(ref_id)
     local_doc_path = 'static/docs/'
+    word = client.gencache.EnsureDispatch('Word.Application')
+    # Runs Word invisibly in the background
+    word.Visible = False
     remote_doc_path = '//ccvuni01/PlanningPortal/' + ref_string + '/Attachments'
     # Clear static/docs folder
     for local_doc in os.listdir(local_doc_path):
@@ -68,6 +72,20 @@ def get_docs(ref_id):
         if (os.path.isfile(full_path)):
             if not any(name in full_path for name in no_show_list):
                 shutil.copy(full_path, local_doc_path)
+    # Convert docx to pdf
+    for document in os.listdir('static/docs'):
+        if document.endswith('.docx'):
+            new_name = document.replace('.docx', '.pdf')
+            # Get the full document path, necessary for the win32 library to find the file
+            abspath = os.path.abspath('static/docs')
+            doc_path = os.path.join(abspath, document)
+            # File path for the PDF to be saved to
+            new_file = os.path.join(abspath, new_name)
+            # Open the document and save it as a pdf (FileFormat=17)
+            word_doc = word.Documents.Open(doc_path)
+            word_doc.SaveAs(new_file, FileFormat=17)
+            word_doc.Close()
+            os.remove(doc_path)
     docs_to_json(os.listdir(local_doc_path))
     # Return the reference search result
     return docs_to_json(os.listdir(local_doc_path))
