@@ -86,7 +86,6 @@ def get_docs(ref_id):
             word_doc.SaveAs(new_file, FileFormat=17)
             word_doc.Close()
             os.remove(doc_path)
-    print docs_to_json(os.listdir(local_doc_path))
     # Return the reference search result
     return docs_to_json(os.listdir(local_doc_path))
 
@@ -108,7 +107,6 @@ def handle_doc_types():
     data = ast.literal_eval(json.dumps(request.json))
     # Get the application number
     app_num = data[0]['application']
-    print "hi: " + app_num
     # Create a string out of the JSON
     json_string = json.dumps(request.json)
     # Create a file and write the string to it

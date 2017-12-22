@@ -117,7 +117,7 @@
                 <form class="select-document-type" ng-show="showDocumentTypes">
                     <md-content>
                         <md-list flex ng-model="data.docs" style="padding-top: 0px; padding-bottom: 0px;">
-                            <md-list-item class="md-3-line" ng-repeat="docu in docuData" ng-click="submit(docu.value, pdfs[pdfIndex].name, num.id)">
+                            <md-list-item class="md-3-line" ng-repeat="docu in docuData" ng-click="submit(docu.value, pdfs[pdfIndex].name, num.id)" ng-disabled="!selectEnabled">
                                 <div class="md-list-item-text">
                                     <md-icon style="float: left;">description</md-icon>
                                     <span style="position: absolute; margin-top: 3px;">
@@ -260,7 +260,7 @@
             })
 
             // Main controller function, covers all page elements
-            function mainCtrl($scope, $sce, $mdDialog, $mdMedia, $mdToast, $http) {
+            function mainCtrl($scope, $sce, $mdDialog, $mdMedia, $mdToast, $http, $timeout) {
                 /* * * * * * * * * * * * *
                  * APPLICATION SELECTION *
                  * * * * * * * * * * * * */
@@ -286,7 +286,6 @@
                         $scope.referenceSearch = selectedApp
                         // Updates the iframe with the documents
                         refreshDisplay(response.data);
-                        console.log($scope.pdfCount);
                         });
                     // Shows the document types instead of the applications
                     $scope.showDocumentTypes = true;
@@ -322,11 +321,9 @@
 
                 // Submit button for each document
                 $scope.submit = function(submitType, docName) {
-                    console.log($scope.referenceSearch);
                     // Builds the JSON for each application
                     submittedTypes.push({application: $scope.referenceSearch, name: docName, type: submitType});
                     if ($scope.pdfIndex == ($scope.pdfCount - 1)) {
-                        console.log(submittedTypes);
                         // Reset any values back to their defaults when first loading the page
                         $scope.showDocumentTypes = false;
                         $scope.showDocumentName = false;
@@ -360,7 +357,11 @@
                     submittedTypes.pop();
                 }
 
-
+                // Stops the buttons from being pressed before everything's loaded
+                $scope.selectEnabled = false;
+                $timeout(function() {
+                    $scope.selectEnabled = true;
+                }, 3000);
 
                 /* * * * * * * * * * *
                  * DOCUMENT DISPLAY  *
@@ -443,7 +444,6 @@
                             email: email,
                             message: message
                         };
-                        console.log(data);
                         $http.post("/message", {name: name, email: email, message: message});
                         $mdDialog.cancel();
                         $mdToast.show(
