@@ -1,4 +1,4 @@
-import os, sys, time, shutil, json, ast, fnmatch
+import os, sys, time, shutil, json, ast, fnmatch, datetime
 import win32com.client as client
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from itertools import ifilterfalse
@@ -33,8 +33,8 @@ def docs_to_json(doc_list):
     no_ext_list = []
     doc_list = os.listdir('static/docs')
     for doc in doc_list:
-        # Removes file extensions
-        no_ext_list.append(os.path.splitext(doc)[0])
+        # Removes file extensions (doesn't actually remove file extensions)
+        no_ext_list.append(doc)
     # Adds the URL path prefix
     doc_list = ['/static/docs/' + doc for doc in doc_list]
     # Converts to a JSON array
@@ -86,7 +86,7 @@ def get_docs(ref_id):
             word_doc.SaveAs(new_file, FileFormat=17)
             word_doc.Close()
             os.remove(doc_path)
-    docs_to_json(os.listdir(local_doc_path))
+    print docs_to_json(os.listdir(local_doc_path))
     # Return the reference search result
     return docs_to_json(os.listdir(local_doc_path))
 
@@ -96,9 +96,10 @@ def handle_messsage():
     data = ast.literal_eval(json.dumps(request.json))
     # Build the mail message
     message = 'Name: %s\nEmail: %s\nMessage: %s' % (data['name'], data['email'], data['message'])
-    #loc = 'logs/%s' % data.name
-    #try:
-        #file = open('logs/')
+    timestamp = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M')
+    log_file = 'logs/' + timestamp + '-' + data['name'] + '.log'
+    with open(log_file, 'w') as log:
+        log.write(message)
     return jsonify(request.json)
 
 @app.route('/submit', methods=['POST'])

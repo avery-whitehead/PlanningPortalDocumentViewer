@@ -445,6 +445,15 @@
                         };
                         console.log(data);
                         $http.post("/message", {name: name, email: email, message: message});
+                        $mdDialog.cancel();
+                        $mdToast.show(
+                            $mdToast.simple({
+                                textContent: 'Thank you for your feedback!',
+                                position: 'top center',
+                                hideDelay: 3000
+                            })
+                        );
+                        $http.get("/");
                     }
                 }
             }
